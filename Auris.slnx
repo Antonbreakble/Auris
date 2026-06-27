@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Auris.Core/Auris.Core.csproj" />
+    <Project Path="src/Auris.Host/Auris.Host.csproj" />
+    <Project Path="src/Auris.Infrastructure/Auris.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Auris.Core.Tests/Auris.Core.Tests.csproj" />
+    <Project Path="tests/Auris.Infrastructure.Tests/Auris.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

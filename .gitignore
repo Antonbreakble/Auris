@@ -1,0 +1,18 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.log
+
+# Rider
+.idea/
+
+# Build output
+artifacts/
+publish/
+
+# OS
+.DS_Store
+Thumbs.db
