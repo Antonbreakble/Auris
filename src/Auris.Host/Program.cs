@@ -1,26 +1,41 @@
+using Auris.Core.Abstractions;
+using Auris.Core.Options;
+using Auris.Core.Queue;
+using Auris.Core.Services;
+using Auris.Host.Service;
+using Auris.Infrastructure.AudioLibrary;
+using Auris.Infrastructure.ExternalPlayer;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.Configure<QueueOptions>(
+    builder.Configuration.GetSection("Auris:Queue"));
+
+builder.Services.Configure<AudioLibraryOptions>(
+    builder.Configuration.GetSection("Auris:AudioLibrary"));
+
+builder.Services.Configure<ExternalPlayerOptions>(
+    builder.Configuration.GetSection("Auris:Player"));
+
+builder.Services.AddSingleton<IPlaybackQueue, PlaybackQueue>();
+builder.Services.AddSingleton<IPlaybackStateProvider, PlaybackStateProvider>();
+builder.Services.AddSingleton<IAudioPlayer, ExternalProcessAudioPlayer>();
+
+builder.Services.AddSingleton<IPlaybackService, PlaybackService>();
+
+builder.Services.AddHostedService<PlaybackBackgroundService>();
+
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
+if (!app.Environment.IsDevelopment()) {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
 }
-
-app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseAuthorization();
-
 app.MapStaticAssets();
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapRazorPages().WithStaticAssets();
 
 app.Run();
