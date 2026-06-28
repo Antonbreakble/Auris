@@ -11,8 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<QueueOptions>(
     builder.Configuration.GetSection("Auris:Queue"));
 
-builder.Services.Configure<AudioLibraryOptions>(
-    builder.Configuration.GetSection("Auris:AudioLibrary"));
+builder.Services.AddOptions<AudioLibraryOptions>()
+    .Bind(builder.Configuration.GetSection("Auris:AudioLibrary"))
+    .Validate(options => Directory.Exists(options.RootPath))
+    .ValidateOnStart();
 
 builder.Services.Configure<ExternalPlayerOptions>(
     builder.Configuration.GetSection("Auris:Player"));
@@ -20,6 +22,7 @@ builder.Services.Configure<ExternalPlayerOptions>(
 builder.Services.AddSingleton<IPlaybackQueue, PlaybackQueue>();
 builder.Services.AddSingleton<IPlaybackStateProvider, PlaybackStateProvider>();
 builder.Services.AddSingleton<IAudioPlayer, ExternalProcessAudioPlayer>();
+builder.Services.AddSingleton<IAudioLibrary, FileSystemAudioLibrary>();
 
 builder.Services.AddSingleton<IPlaybackService, PlaybackService>();
 
