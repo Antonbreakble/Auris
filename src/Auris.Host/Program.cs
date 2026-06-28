@@ -22,6 +22,7 @@ builder.Services.Configure<ExternalPlayerOptions>(
 
 builder.Services.AddSingleton<IPlaybackQueue, PlaybackQueue>();
 builder.Services.AddSingleton<IPlaybackStateProvider, PlaybackStateProvider>();
+builder.Services.AddSingleton<ExternalProcessRunner>();
 builder.Services.AddSingleton<IAudioPlayer, ExternalProcessAudioPlayer>();
 builder.Services.AddSingleton<IAudioLibrary, FileSystemAudioLibrary>();
 builder.Services.AddSingleton<IPlaybackService, PlaybackService>();
