@@ -11,7 +11,7 @@ public static class PlaybackQueueEndpoints {
 
         api.MapPost("/play", Play);
         api.MapGet("/queue", GetQueue);
-        api.MapPost("/queue/clear", ClearQueue);
+        api.MapDelete("/queue/clear", ClearQueue);
 
         return endpoints;
     }
