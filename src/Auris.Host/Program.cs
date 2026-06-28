@@ -2,6 +2,7 @@ using Auris.Core.Abstractions;
 using Auris.Core.Options;
 using Auris.Core.Queue;
 using Auris.Core.Services;
+using Auris.Host.Endpoints;
 using Auris.Host.Service;
 using Auris.Infrastructure.AudioLibrary;
 using Auris.Infrastructure.ExternalPlayer;
@@ -23,7 +24,6 @@ builder.Services.AddSingleton<IPlaybackQueue, PlaybackQueue>();
 builder.Services.AddSingleton<IPlaybackStateProvider, PlaybackStateProvider>();
 builder.Services.AddSingleton<IAudioPlayer, ExternalProcessAudioPlayer>();
 builder.Services.AddSingleton<IAudioLibrary, FileSystemAudioLibrary>();
-
 builder.Services.AddSingleton<IPlaybackService, PlaybackService>();
 
 builder.Services.AddHostedService<PlaybackBackgroundService>();
@@ -40,5 +40,8 @@ app.UseRouting();
 
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
+
+app.MapAudioLibraryEndpoints();
+app.MapPlaybackQueueEndpoints();
 
 app.Run();
