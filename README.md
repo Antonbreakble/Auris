@@ -18,7 +18,29 @@ Auris also provides a web admin panel for viewing and clearing the queue.
 
 ## Project Status
 
-Early development.
+Auris is in early active development.
+
+### Implemented
+
+* Basic project structure.
+* Audio library configuration.
+* File system based audio library.
+* Audio file discovery and lookup.
+* Playback queue core.
+
+### In Progress
+
+* REST API for adding files to the playback queue.
+* Integration between audio library, queue, and playback service.
+
+### Planned
+
+* Web admin panel.
+* Queue management endpoints.
+* Playback status endpoint.
+* External player integration.
+* Windows and Linux run instructions.
+
 
 ## License
 
