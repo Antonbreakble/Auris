@@ -18,6 +18,37 @@ Auris also provides a web admin panel for viewing and clearing the queue.
 
 ## Project Status
 
+Auris is in early active development, but the basic playback flow is already implemented and can be tested.
+
+### Implemented
+
+* Basic project structure.
+* Audio library configuration.
+* File system based audio library.
+* Audio file discovery and lookup.
+* Playback queue core.
+* External player integration.
+* REST API for playback requests.
+* REST API for viewing and clearing the playback queue.
+* REST API for viewing available audio files.
+
+### Available API
+
+API documentation: [docs/rest-api.md](docs/rest-api.md)
+
+### Current State
+
+The application can now be launched and tested locally.
+You can configure the audio library path, start the application, view available audio files, send playback requests, inspect the queue, and clear it.
+
+### Planned
+
+* Web admin panel.
+* Playback status endpoint.
+* Windows and Linux run instructions.
+* Packaging and deployment improvements.
+
+
 Auris is in early active development.
 
 ### Implemented
