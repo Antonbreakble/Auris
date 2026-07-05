@@ -58,6 +58,7 @@
 
 @section Scripts {
     <script>
+        
         async function updatePlaybackStatus() {
             try {
                 const response = await fetch('/api/audio/status');
@@ -247,6 +248,89 @@
         document.getElementById('clear-queue-button')
             ?.addEventListener('click', clearQueue);
 
+        async function enqueueLibraryFile(fileName, button) {
+            if (!fileName) {
+                showLibraryActionMessage('Не указано имя файла.', 'warning');
+                return;
+            }
+
+            const originalText = button?.textContent;
+
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Добавление...';
+            }
+
+            try {
+                const response = await fetch('/api/audio/play', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fileName: fileName,
+                        requestedBy: 'admin'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    showLibraryActionMessage(
+                        errorText || 'Не удалось добавить файл в очередь.',
+                        'warning');
+
+                    return;
+                }
+
+                showLibraryActionMessage(
+                    `Файл "${fileName}" добавлен в очередь.`,
+                    'success');
+
+                await updateQueue();
+            } catch {
+                showLibraryActionMessage(
+                    'Ошибка при обращении к серверу.',
+                    'warning');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            }
+        }
+
+        let libraryActionMessageHideTimer;
+
+        function showLibraryActionMessage(message, type) {
+            const messageBlock = document.getElementById('library-action-message');
+
+            if (!messageBlock) {
+                return;
+            }
+
+            clearTimeout(libraryActionMessageHideTimer);
+
+            messageBlock.textContent = message;
+            messageBlock.className =
+                `alert alert-${type} position-fixed top-0 end-0 m-3 shadow`;
+
+            messageBlock.style.zIndex = '1080';
+            messageBlock.style.minWidth = '320px';
+            messageBlock.style.maxWidth = '480px';
+
+            libraryActionMessageHideTimer = setTimeout(() => {
+                messageBlock.classList.add('d-none');
+            }, 1000);
+        }
+
+        document.querySelectorAll('.js-play-library-file')
+            .forEach(button => {
+                button.addEventListener('click', async () => {
+                    const fileName = button.dataset.audioFileName;
+                    await enqueueLibraryFile(fileName, button);
+                });
+            });
+        
         updatePlaybackStatus();
         updateQueue();
 

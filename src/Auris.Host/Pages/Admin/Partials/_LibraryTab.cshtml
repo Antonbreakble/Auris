@@ -1,35 +1,42 @@
 ﻿@model Auris.Host.Admin.ViewModels.LibraryTabViewModel
 
-<section>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="h4 mb-1">Доступные аудиофайлы</h2>
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h2 class="h4 mb-1">Доступные аудиофайлы</h2>
 
-            <div class="text-muted">
-                Найдено файлов: @Model.Files.Count
-            </div>
+        <div class="text-muted">
+            Найдено файлов: @Model.Files.Count
         </div>
-
-        <a class="btn btn-outline-secondary"
-           asp-page="/Admin/Index"
-           asp-route-tab="library">
-            Обновить
-        </a>
     </div>
 
-    @if (Model.Files.Count == 0)
-    {
-        <div class="alert alert-secondary">
-            Аудиофайлы не найдены.
-        </div>
-    }
-    else
-    {
-        <table class="table table-hover align-middle">
+    <a class="btn btn-outline-secondary btn-sm"
+       asp-page="/Admin/Index"
+       asp-route-tab="library">
+        Обновить
+    </a>
+</div>
+
+<div id="library-action-message"
+     class="alert d-none position-fixed top-0 end-0 m-3 shadow"
+     style="z-index: 1080; min-width: 320px; max-width: 480px;"
+     role="alert">
+</div>
+
+@if (Model.Files.Count == 0)
+{
+    <div class="alert alert-secondary">
+        Аудиофайлы не найдены.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle">
             <thead>
             <tr>
                 <th>Файл</th>
                 <th>Расширение</th>
+                <th class="text-end">Действие</th>
             </tr>
             </thead>
 
@@ -39,9 +46,16 @@
                 <tr>
                     <td>@file.Name</td>
                     <td>@file.Extension</td>
+                    <td class="text-end">
+                        <button type="button"
+                                class="btn btn-primary btn-sm js-play-library-file"
+                                data-audio-file-name="@file.Name">
+                            Воспроизвести
+                        </button>
+                    </td>
                 </tr>
             }
             </tbody>
         </table>
-    }
-</section>
+    </div>
+}
