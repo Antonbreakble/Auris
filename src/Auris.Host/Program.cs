@@ -2,6 +2,7 @@ using Auris.Core.Abstractions;
 using Auris.Core.Options;
 using Auris.Core.Queue;
 using Auris.Core.Services;
+using Auris.Host.Admin.Services;
 using Auris.Host.Endpoints;
 using Auris.Host.Service;
 using Auris.Infrastructure.AudioLibrary;
@@ -30,6 +31,7 @@ builder.Services.AddSingleton<IPlaybackService, PlaybackService>();
 builder.Services.AddHostedService<PlaybackBackgroundService>();
 
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<AdminDashboardService>();
 
 var app = builder.Build();
 

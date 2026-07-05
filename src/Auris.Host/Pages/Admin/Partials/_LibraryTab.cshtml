@@ -1,0 +1,47 @@
+﻿@model Auris.Host.Admin.ViewModels.LibraryTabViewModel
+
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="h4 mb-1">Доступные аудиофайлы</h2>
+
+            <div class="text-muted">
+                Найдено файлов: @Model.Files.Count
+            </div>
+        </div>
+
+        <a class="btn btn-outline-secondary"
+           asp-page="/Admin/Index"
+           asp-route-tab="library">
+            Обновить
+        </a>
+    </div>
+
+    @if (Model.Files.Count == 0)
+    {
+        <div class="alert alert-secondary">
+            Аудиофайлы не найдены.
+        </div>
+    }
+    else
+    {
+        <table class="table table-hover align-middle">
+            <thead>
+            <tr>
+                <th>Файл</th>
+                <th>Расширение</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            @foreach (var file in Model.Files)
+            {
+                <tr>
+                    <td>@file.Name</td>
+                    <td>@file.Extension</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</section>
