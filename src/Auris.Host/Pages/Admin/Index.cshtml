@@ -7,13 +7,28 @@
 }
 
 <div class="mb-4">
-    <h1>Auris Admin</h1>
+    <h1 class="mb-2">Auris Admin</h1>
     <p class="text-muted mb-0">
         Панель управления локальным аудиосервисом.
     </p>
 </div>
 
-<ul class="nav nav-tabs mb-4">
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Сейчас воспроизводится</span>
+        <span id="playback-status-badge" class="badge text-bg-secondary">Idle</span>
+    </div>
+
+    <div class="card-body">
+        <div id="playback-current-file" class="fw-semibold">
+            Сейчас ничего не воспроизводится.
+        </div>
+
+        <div id="playback-current-meta" class="text-muted small mt-1"></div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3">
     <li class="nav-item">
         <a class="nav-link @(Model.Dashboard.ActiveTab == AdminDashboardService.QueueTab ? "active" : "")"
            asp-page="/Admin/Index"
@@ -33,12 +48,209 @@
 
 @if (Model.Dashboard.ActiveTab == AdminDashboardService.QueueTab)
 {
-    <partial name="~/Pages/Admin/Partials/_QueueTab.cshtml"
-             model="Model.Dashboard.Queue" />
+    @await Html.PartialAsync("Partials/_QueueTab", Model.Dashboard.Queue)
 }
 
 @if (Model.Dashboard.ActiveTab == AdminDashboardService.LibraryTab)
 {
-    <partial name="~/Pages/Admin/Partials/_LibraryTab.cshtml"
-             model="Model.Dashboard.Library" />
+    @await Html.PartialAsync("Partials/_LibraryTab", Model.Dashboard.Library)
+}
+
+@section Scripts {
+    <script>
+        async function updatePlaybackStatus() {
+            try {
+                const response = await fetch('/api/audio/status');
+
+                if (!response.ok) {
+                    setPlaybackStatusError();
+                    return;
+                }
+
+                const status = await response.json();
+
+                const badge = document.getElementById('playback-status-badge');
+                const currentFile = document.getElementById('playback-current-file');
+                const meta = document.getElementById('playback-current-meta');
+
+                const isPlaying = status.isPlaying ?? status.IsPlaying;
+                const state = status.state ?? status.State ?? 'Idle';
+                const fileName = status.fileName ?? status.FileName;
+                const currentItemId = status.currentItemId ?? status.CurrentItemId;
+                const startedAt = status.startedAt ?? status.StartedAt;
+
+                if (isPlaying) {
+                    badge.textContent = state;
+                    badge.className = 'badge text-bg-success';
+
+                    currentFile.textContent = fileName ?? 'Файл воспроизводится';
+
+                    const metaItems = [];
+
+                    if (currentItemId) {
+                        metaItems.push(`ItemId: ${currentItemId}`);
+                    }
+
+                    if (startedAt) {
+                        const startedDate = new Date(startedAt);
+                        metaItems.push(`Started: ${startedDate.toLocaleString()}`);
+                    }
+
+                    meta.textContent = metaItems.join(' · ');
+                    return;
+                }
+
+                badge.textContent = state;
+                badge.className = 'badge text-bg-secondary';
+
+                currentFile.textContent = 'Сейчас ничего не воспроизводится.';
+                meta.textContent = '';
+            } catch {
+                setPlaybackStatusError();
+            }
+        }
+
+        function setPlaybackStatusError() {
+            const badge = document.getElementById('playback-status-badge');
+            const currentFile = document.getElementById('playback-current-file');
+            const meta = document.getElementById('playback-current-meta');
+
+            badge.textContent = 'Unknown';
+            badge.className = 'badge text-bg-warning';
+
+            currentFile.textContent = 'Не удалось получить статус воспроизведения.';
+            meta.textContent = '';
+        }
+
+        async function updateQueue() {
+            const queueCount = document.getElementById('queue-count');
+            const queueCapacity = document.getElementById('queue-capacity');
+            const queueBody = document.getElementById('queue-table-body');
+            const queueEmpty = document.getElementById('queue-empty');
+            const queueTableWrapper = document.getElementById('queue-table-wrapper');
+            const queueError = document.getElementById('queue-error');
+
+            if (!queueCount || !queueCapacity || !queueBody || !queueEmpty || !queueTableWrapper) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/audio/queue');
+
+                if (!response.ok) {
+                    setQueueError(true);
+                    return;
+                }
+
+                const queue = await response.json();
+
+                const count = queue.count ?? queue.Count ?? 0;
+                const capacity = queue.capacity ?? queue.Capacity ?? 0;
+                const items = queue.items ?? queue.Items ?? [];
+
+                queueCount.textContent = count;
+                queueCapacity.textContent = capacity;
+
+                queueBody.innerHTML = '';
+
+                if (items.length === 0) {
+                    queueEmpty.classList.remove('d-none');
+                    queueTableWrapper.classList.add('d-none');
+                    setQueueError(false);
+                    return;
+                }
+
+                queueEmpty.classList.add('d-none');
+                queueTableWrapper.classList.remove('d-none');
+
+                for (const item of items) {
+                    queueBody.insertAdjacentHTML('beforeend', renderQueueRow(item));
+                }
+
+                setQueueError(false);
+            } catch {
+                setQueueError(true);
+            }
+        }
+
+        function renderQueueRow(item) {
+            const id = item.id ?? item.Id ?? '';
+            const fileName = item.fileName ?? item.FileName ?? '';
+            const createdAt = item.createdAt ?? item.CreatedAt;
+            const createdBy = item.createdBy ?? item.CreatedBy ?? '';
+
+            return `
+                <tr data-queue-item-id="${escapeHtml(id)}">
+                    <td>${escapeHtml(fileName)}</td>
+                    <td>${formatDateTime(createdAt)}</td>
+                    <td>${escapeHtml(createdBy)}</td>
+                </tr>`;
+        }
+
+        async function clearQueue() {
+            try {
+                const response = await fetch('/api/audio/queue/clear', {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    setQueueError(true);
+                    return;
+                }
+
+                await updateQueue();
+            } catch {
+                setQueueError(true);
+            }
+        }
+
+        function setQueueError(isError) {
+            const queueError = document.getElementById('queue-error');
+
+            if (!queueError) {
+                return;
+            }
+
+            if (isError) {
+                queueError.classList.remove('d-none');
+            } else {
+                queueError.classList.add('d-none');
+            }
+        }
+
+        function formatDateTime(value) {
+            if (!value) {
+                return '';
+            }
+
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) {
+                return '';
+            }
+
+            return date.toLocaleString();
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        document.getElementById('refresh-queue-button')
+            ?.addEventListener('click', updateQueue);
+
+        document.getElementById('clear-queue-button')
+            ?.addEventListener('click', clearQueue);
+
+        updatePlaybackStatus();
+        updateQueue();
+
+        setInterval(updatePlaybackStatus, 1000);
+        setInterval(updateQueue, 1000);
+    </script>
 }

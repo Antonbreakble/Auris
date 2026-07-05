@@ -46,5 +46,6 @@ app.MapRazorPages().WithStaticAssets();
 
 app.MapAudioLibraryEndpoints();
 app.MapPlaybackQueueEndpoints();
+app.MapPlaybackStatusEndpoints();
 
 app.Run();
