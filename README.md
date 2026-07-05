@@ -15,8 +15,10 @@ Auris is intended to run as a small local service on Windows or Linux and use an
 * Configurable queue depth.
 * REST API for integration with external systems.
 * Web admin panel.
+* Current playback status view from the admin panel.
 * Queue viewing and clearing from the admin panel.
 * Available audio files view from the admin panel.
+* Add audio files from the library to the playback queue from the admin panel.
 * External player process support, for example `ffplay`.
 * Cross-platform runtime target: Windows and Linux.
 
@@ -30,22 +32,25 @@ Default page:
 /Admin
 ```
 
-Current admin panel tabs:
+Current admin panel features:
 
+* View current playback status.
 * **Current queue**
 
   * View current playback queue.
   * Refresh queue state.
   * Clear waiting queue items.
-
 * **Audio files**
 
   * View audio files available in the configured audio library.
   * Refresh file list.
+  * Add audio files to the playback queue.
 
 The admin panel uses a shared layout with common header and footer.
 
-The UI currently uses Bootstrap 5. Bootstrap assets are expected to be available locally in the host project:
+The UI currently uses Bootstrap 5.
+
+Bootstrap assets are expected to be available locally in the host project:
 
 ```text
 src/Auris.Host/wwwroot/lib/bootstrap/css/bootstrap.min.css
@@ -85,6 +90,12 @@ GET /api/audio/library/files
 ```
 
 Returns audio files available in the configured audio library.
+
+```http
+GET /api/audio/status
+```
+
+Returns the current playback status.
 
 ## Configuration
 
@@ -147,7 +158,9 @@ or an absolute path to `ffplay`.
 
 Configure the audio library path in `appsettings.json`.
 
-Make sure the external player is available. For example, install FFmpeg and make `ffplay` available in `PATH`, or configure an absolute path to the executable.
+Make sure the external player is available.
+
+For example, install FFmpeg and make `ffplay` available in `PATH`, or configure an absolute path to the executable.
 
 Run the host project:
 
@@ -177,16 +190,16 @@ Implemented:
 * REST API for playback requests.
 * REST API for viewing and clearing the playback queue.
 * REST API for viewing available audio files.
+* REST API for current playback status.
 * Web admin panel.
 * Shared Razor Pages layout.
 * Admin panel tab for current queue.
 * Admin panel tab for available audio files.
+* Current playback status view in the admin panel.
+* Add-to-queue action from the admin panel audio library.
 
 ## Planned
 
-* Playback status endpoint.
-* Playback status view in the admin panel.
-* Add-to-queue action from the admin panel.
 * Windows and Linux run instructions.
 * Packaging and deployment improvements.
 * Authentication and authorization if required.
