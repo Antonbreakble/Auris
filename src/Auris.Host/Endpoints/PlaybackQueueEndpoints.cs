@@ -19,7 +19,7 @@ public static class PlaybackQueueEndpoints {
     private static IResult Play(
         [FromBody] PlayAudioRequest request,
         [FromServices] IAudioLibrary audioLibrary,
-        [FromServices] IPlaybackQueue playbackQueue,
+        [FromServices] IQueue<PlaybackQueueItem> playbackQueue,
         HttpContext httpContext) {
 
         if (string.IsNullOrWhiteSpace(request.FileName))
@@ -54,7 +54,7 @@ public static class PlaybackQueueEndpoints {
         return httpContext.Connection.RemoteIpAddress?.ToString() ?? "api";
     }
 
-    private static IResult GetQueue([FromServices] IPlaybackQueue playbackQueue) {
+    private static IResult GetQueue([FromServices] IQueue<PlaybackQueueItem> playbackQueue) {
 
         var items = playbackQueue
             .Snapshot()
@@ -67,7 +67,7 @@ public static class PlaybackQueueEndpoints {
             Items: items));
     }
 
-    private static IResult ClearQueue([FromServices] IPlaybackQueue playbackQueue) {
+    private static IResult ClearQueue([FromServices] IQueue<PlaybackQueueItem> playbackQueue) {
         playbackQueue.Clear();
         return Results.NoContent();
     }

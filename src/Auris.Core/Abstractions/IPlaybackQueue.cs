@@ -2,16 +2,16 @@
 
 namespace Auris.Core.Abstractions;
 
-public interface IPlaybackQueue {
+public interface IQueue<T> {
     int Count { get; }
 
     int Capacity { get; }
 
-    bool TryEnqueue(PlaybackQueueItem item);
+    bool TryEnqueue(T item);
 
-    Task<PlaybackQueueItem> DequeueAsync(CancellationToken cancellationToken);
+    Task<T> DequeueAsync(CancellationToken cancellationToken);
 
-    IReadOnlyList<PlaybackQueueItem> Snapshot();
+    IReadOnlyList<T> Snapshot();
 
     void Clear();
 }

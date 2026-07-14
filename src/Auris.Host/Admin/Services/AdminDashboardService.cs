@@ -1,4 +1,5 @@
 ﻿using Auris.Core.Abstractions;
+using Auris.Core.Models;
 using Auris.Host.Admin.ViewModels;
 
 namespace Auris.Host.Admin.Services;
@@ -8,11 +9,11 @@ public class AdminDashboardService
     public const string QueueTab = "queue";
     public const string LibraryTab = "library";
 
-    private readonly IPlaybackQueue _playbackQueue;
+    private readonly IQueue<PlaybackQueueItem> _playbackQueue;
     private readonly IAudioLibrary _audioLibrary;
 
     public AdminDashboardService(
-        IPlaybackQueue playbackQueue,
+        IQueue<PlaybackQueueItem> playbackQueue,
         IAudioLibrary audioLibrary)
     {
         _playbackQueue = playbackQueue;

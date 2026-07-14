@@ -6,11 +6,11 @@ namespace Auris.Host.Service;
 
 public class PlaybackBackgroundService : BackgroundService{
     
-    private readonly IPlaybackQueue _playbackQueue;
+    private readonly IQueue<PlaybackQueueItem> _playbackQueue;
     private readonly IPlaybackService _playbackService;
     private readonly ILogger<PlaybackBackgroundService> _logger;
     
-    public PlaybackBackgroundService(IPlaybackQueue playbackQueue,
+    public PlaybackBackgroundService(IQueue<PlaybackQueueItem> playbackQueue,
         IPlaybackService playbackService,
         ILogger<PlaybackBackgroundService> logger) 
     {

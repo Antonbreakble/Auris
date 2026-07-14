@@ -21,7 +21,7 @@ builder.Services.AddOptions<AudioLibraryOptions>()
 builder.Services.Configure<ExternalPlayerOptions>(
     builder.Configuration.GetSection("Auris:Player"));
 
-builder.Services.AddSingleton<IPlaybackQueue, PlaybackQueue>();
+builder.Services.AddSingleton(typeof(IQueue<>), typeof(BoundedQueue<>));
 builder.Services.AddSingleton<IPlaybackStateProvider, PlaybackStateProvider>();
 builder.Services.AddSingleton<ExternalProcessRunner>();
 builder.Services.AddSingleton<IAudioPlayer, ExternalProcessAudioPlayer>();

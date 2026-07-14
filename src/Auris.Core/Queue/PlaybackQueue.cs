@@ -6,20 +6,20 @@ using Microsoft.Extensions.Options;
 
 namespace Auris.Core.Queue;
 
-public class PlaybackQueue : IPlaybackQueue {
+public class BoundedQueue<T> : IQueue<T> {
     
-    private readonly Queue<PlaybackQueueItem> _queue = new();
+    private readonly Queue<T> _queue = new();
     private readonly SemaphoreSlim _itemsAvailable;
     private readonly Lock _lock = new();
 
     private int _count;
 
-    public PlaybackQueue(IOptions<QueueOptions> options) {
+    public BoundedQueue(IOptions<QueueOptions> options) {
         ArgumentNullException.ThrowIfNull(options);
         var capacity = options.Value.Capacity;
        
         if (capacity <= 0)
-            throw new InvalidOperationException("Playback queue capacity must be greater than zero.");
+            throw new InvalidOperationException("Queue capacity must be greater than zero.");
 
         Capacity = capacity;
         _itemsAvailable = new SemaphoreSlim(0, capacity);
@@ -35,7 +35,7 @@ public class PlaybackQueue : IPlaybackQueue {
         }
     }
 
-    public bool TryEnqueue(PlaybackQueueItem item) {
+    public bool TryEnqueue(T item) {
         lock (_lock) {
             if (_count >= Capacity) 
                 return false;
@@ -49,7 +49,7 @@ public class PlaybackQueue : IPlaybackQueue {
         }
     }
 
-    public async Task<PlaybackQueueItem> DequeueAsync(CancellationToken cancellationToken) {
+    public async Task<T> DequeueAsync(CancellationToken cancellationToken) {
         while (true) {
             await _itemsAvailable.WaitAsync(cancellationToken);
             lock (_lock) {
@@ -61,7 +61,7 @@ public class PlaybackQueue : IPlaybackQueue {
         }
     }
 
-    public IReadOnlyList<PlaybackQueueItem> Snapshot() {
+    public IReadOnlyList<T> Snapshot() {
         lock (_lock)
             return _queue.ToArray();
     }
