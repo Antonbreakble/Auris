@@ -44,6 +44,15 @@
             Аудиофайлы
         </a>
     </li>
+    
+    <li class="nav-item">
+        <a
+            class="nav-link @(Model.Dashboard.ActiveTab == AdminDashboardService.TextToSpeechTab ? "active" : "")"
+            asp-page="/Admin/Index"
+            asp-route-tab="@AdminDashboardService.TextToSpeechTab">
+            Синтез речи
+        </a>
+    </li>
 </ul>
 
 @if (Model.Dashboard.ActiveTab == AdminDashboardService.QueueTab)
@@ -54,6 +63,11 @@
 @if (Model.Dashboard.ActiveTab == AdminDashboardService.LibraryTab)
 {
     @await Html.PartialAsync("Partials/_LibraryTab", Model.Dashboard.Library)
+}
+
+@if (Model.Dashboard.ActiveTab == AdminDashboardService.TextToSpeechTab)
+{
+    @await Html.PartialAsync("Partials/_TextToSpeechTab")
 }
 
 @section Scripts {
@@ -329,6 +343,112 @@
                     const fileName = button.dataset.audioFileName;
                     await enqueueLibraryFile(fileName, button);
                 });
+            });
+
+        async function enqueueTextToSpeech() {
+            const textInput = document.getElementById('tts-text');
+            const button = document.getElementById('tts-play-button');
+
+            if (!textInput || !button) {
+                return;
+            }
+
+            const text = textInput.value.trim();
+
+            if (!text) {
+                showTextToSpeechMessage(
+                    'Введите текст сообщения.',
+                    'warning');
+
+                return;
+            }
+
+            const originalText = button.textContent;
+
+            button.disabled = true;
+            button.textContent = 'Добавление...';
+
+            try {
+                const response = await fetch('/api/tts/play', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        requestedBy: 'admin'
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+
+                    showTextToSpeechMessage(
+                        error || 'Не удалось добавить текст в очередь.',
+                        'warning');
+
+                    return;
+                }
+
+                showTextToSpeechMessage(
+                    'Текст добавлен в очередь на озвучивание.',
+                    'success');
+
+                textInput.value = '';
+                updateTextToSpeechLength();
+            }
+            catch {
+                showTextToSpeechMessage(
+                    'Ошибка при обращении к серверу.',
+                    'warning');
+            }
+            finally {
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+        function showTextToSpeechMessage(message, type) {
+            const element = document.getElementById(
+                'tts-action-message');
+
+            if (!element) {
+                return;
+            }
+
+            element.textContent = message;
+            element.className = `alert alert-${type}`;
+        }
+
+        function updateTextToSpeechLength() {
+            const textInput = document.getElementById('tts-text');
+            const lengthElement = document.getElementById(
+                'tts-text-length');
+
+            if (!textInput || !lengthElement) {
+                return;
+            }
+
+            lengthElement.textContent =
+                `${textInput.value.length} символов`;
+        }
+
+        document.getElementById('tts-play-button')
+            ?.addEventListener(
+                'click',
+                enqueueTextToSpeech);
+
+        document.getElementById('tts-text')
+            ?.addEventListener(
+                'input',
+                updateTextToSpeechLength);
+        
+        document.getElementById('tts-text')
+            ?.addEventListener('keydown', event => {
+                if (event.ctrlKey && event.key === 'Enter') {
+                    event.preventDefault();
+                    enqueueTextToSpeech();
+                }
             });
         
         updatePlaybackStatus();

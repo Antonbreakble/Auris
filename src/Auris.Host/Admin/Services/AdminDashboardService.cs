@@ -8,6 +8,7 @@ public class AdminDashboardService
 {
     public const string QueueTab = "queue";
     public const string LibraryTab = "library";
+    public const string TextToSpeechTab = "tts";
 
     private readonly IQueue<PlaybackQueueItem> _playbackQueue;
     private readonly IAudioLibrary _audioLibrary;
@@ -63,6 +64,7 @@ public class AdminDashboardService
     private static string NormalizeTab(string? tab) {
         return tab?.ToLowerInvariant() switch {
             LibraryTab => LibraryTab,
+            TextToSpeechTab => TextToSpeechTab,
             _ => QueueTab
         };
     }
