@@ -10,12 +10,13 @@ The REST API is implemented and can be tested locally.
 
 Available operations:
 
-* play an audio file;
-* view the playback queue;
-* clear the playback queue;
-* view available audio files;
-* view the current playback status;
-* submit text for speech synthesis and playback.
+- play an audio file;
+- view the playback queue;
+- clear the playback queue;
+- view available audio files;
+- view the current playback status;
+- stop the current playback;
+- submit text for speech synthesis and playback.
 
 ## Base URL
 
@@ -64,10 +65,10 @@ POST /api/audio/play
 
 ### Fields
 
-| Field         | Required | Description                                                                                             |
-| ------------- | -------: | ------------------------------------------------------------------------------------------------------- |
-| `fileName`    |      yes | Audio file name from the configured audio library.                                                      |
-| `requestedBy` |       no | Source of the request, for example a workstation, SCADA system, script, or operator station.           |
+| Field | Required | Description |
+| --- | ---: | --- |
+| `fileName` | yes | Audio file name from the configured audio library. |
+| `requestedBy` | no | Source of the request, for example a workstation, SCADA system, script, or operator station. |
 
 ### Successful Response
 
@@ -118,10 +119,10 @@ POST /api/tts/play
 
 ### Fields
 
-| Field         | Required | Description                                                                                   |
-| ------------- | -------: | --------------------------------------------------------------------------------------------- |
-| `text`        |      yes | Text to synthesize. Empty or whitespace-only values are rejected.                             |
-| `requestedBy` |       no | Source of the request, for example a workstation, SCADA system, script, or operator station. |
+| Field | Required | Description |
+| --- | ---: | --- |
+| `text` | yes | Text to synthesize. Empty or whitespace-only values are rejected. |
+| `requestedBy` | no | Source of the request, for example a workstation, SCADA system, script, or operator station. |
 
 ### Successful Response
 
@@ -293,13 +294,39 @@ Example while idle:
 
 ### Fields
 
-| Field           | Description                                                  |
-| --------------- | ------------------------------------------------------------ |
-| `state`         | Playback state. Current values are `Idle` and `Playing`.     |
-| `isPlaying`     | `true` when the current state is `Playing`.                  |
-| `currentItemId` | Identifier of the current playback queue item, or `null`.    |
-| `fileName`      | Name of the currently playing file, or `null`.               |
-| `startedAt`     | UTC timestamp when current playback started, or `null`.      |
+| Field | Description |
+| --- | --- |
+| `state` | Playback state. Current values are `Idle` and `Playing`. |
+| `isPlaying` | `true` when the current state is `Playing`. |
+| `currentItemId` | Identifier of the current playback queue item, or `null`. |
+| `fileName` | Name of the currently playing file, or `null`. |
+| `startedAt` | UTC timestamp when current playback started, or `null`. |
+
+## Stop Current Playback
+
+Stops the currently playing audio file.
+
+Waiting items remain in the playback queue. If the queue contains another item, its playback starts normally after the current playback is stopped.
+
+```http
+DELETE /api/audio/current
+```
+
+### Successful Response
+
+```http
+204 No Content
+```
+
+The current playback was stopped. The response body is empty.
+
+### Error Response
+
+```http
+404 Not Found
+```
+
+Nothing is currently playing. The response body is empty.
 
 ## Notes
 
