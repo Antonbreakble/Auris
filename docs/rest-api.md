@@ -6,18 +6,26 @@ The API is intended for integration with external systems, operator workstations
 
 ## Current State
 
-The basic REST API is implemented and can be tested locally.
+The REST API is implemented and can be tested locally.
 
 Available operations:
 
 * play an audio file;
 * view the playback queue;
 * clear the playback queue;
-* view available audio files.
+* view available audio files;
+* view the current playback status;
+* submit text for speech synthesis and playback.
 
 ## Base URL
 
 The actual address and port depend on the application launch settings.
+
+Example:
+
+```text
+http://localhost:<port>
+```
 
 ## Content Type
 
@@ -27,13 +35,19 @@ Requests with a body use JSON:
 Content-Type: application/json
 ```
 
+## Request Source
+
+Audio and text-to-speech requests support the optional `requestedBy` field.
+
+When `requestedBy` is not provided or contains only whitespace, Auris uses the remote IP address. If the address is unavailable, the value `api` is used.
+
 ## Play Audio File
 
 Adds an audio file to the playback queue.
 
-If nothing is currently playing, playback will start when the background playback service processes the queue.
+If nothing is currently playing, playback starts when the background playback service processes the queue.
 
-If another file is already playing, the requested file will wait in the queue.
+If another file is already playing, the requested file waits in the queue.
 
 ```http
 POST /api/audio/play
@@ -53,7 +67,7 @@ POST /api/audio/play
 | Field         | Required | Description                                                                                             |
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------- |
 | `fileName`    |      yes | Audio file name from the configured audio library.                                                      |
-| `requestedBy` |       no | Source of the playback request. For example, workstation name, system name, SCADA, or operator station. |
+| `requestedBy` |       no | Source of the request, for example a workstation, SCADA system, script, or operator station.           |
 
 ### Successful Response
 
@@ -75,7 +89,7 @@ The request is invalid. For example, `fileName` is empty.
 404 Not Found
 ```
 
-The audio file was not found.
+The audio file was not found or the file name is ambiguous.
 
 ```http
 503 Service Unavailable
@@ -83,9 +97,83 @@ The audio file was not found.
 
 The playback queue is full.
 
+## Submit Text-to-Speech Request
+
+Adds text to the text-to-speech processing queue.
+
+The request is processed asynchronously. Auris normalizes the text, reuses an existing generated WAV file when available, or invokes the configured command-line synthesizer. The resulting audio file is then submitted to the playback queue.
+
+```http
+POST /api/tts/play
+```
+
+### Request Body
+
+```json
+{
+  "text": "Attention. The process has been stopped.",
+  "requestedBy": "SCADA"
+}
+```
+
+### Fields
+
+| Field         | Required | Description                                                                                   |
+| ------------- | -------: | --------------------------------------------------------------------------------------------- |
+| `text`        |      yes | Text to synthesize. Empty or whitespace-only values are rejected.                             |
+| `requestedBy` |       no | Source of the request, for example a workstation, SCADA system, script, or operator station. |
+
+### Successful Response
+
+```http
+202 Accepted
+```
+
+The response body is empty.
+
+A successful response means that the request was accepted into the text-to-speech queue. Synthesis and playback happen asynchronously after the response is returned.
+
+### Error Responses
+
+```http
+400 Bad Request
+```
+
+The `text` field is empty or contains only whitespace.
+
+```http
+503 Service Unavailable
+```
+
+The text-to-speech queue is full.
+
+### Processing and Cache Behavior
+
+Before synthesis, Auris trims the text and replaces consecutive whitespace characters with a single space.
+
+Generated files are stored in:
+
+```text
+<AudioLibrary.RootPath>/generated
+```
+
+The file name is calculated from the SHA-256 hash of the normalized text:
+
+```text
+tts_<SHA256>.wav
+```
+
+If the file already exists, synthesis is skipped and the cached file is used.
+
+The cache key is based only on normalized text. Changing the configured voice or model does not invalidate an existing cached file automatically.
+
+The current API does not provide endpoints for viewing or clearing the text-to-speech queue.
+
 ## View Playback Queue
 
-Returns the current playback queue.
+Returns all waiting items currently stored in the playback queue.
+
+The item being played is represented by the playback status endpoint and is not part of the waiting queue response.
 
 ```http
 GET /api/audio/queue
@@ -124,6 +212,8 @@ Example:
 
 Clears all waiting items from the playback queue.
 
+The currently playing item is not stopped.
+
 ```http
 DELETE /api/audio/queue/clear
 ```
@@ -155,22 +245,68 @@ Example:
 ```json
 [
   {
-    "name": "alarm.mp3",
-    "extension": ".mp3"
+    "name": "alarm.mp3"
   },
   {
-    "name": "warning.wav",
-    "extension": ".wav"
+    "name": "warning.wav"
   }
 ]
 ```
 
+## View Playback Status
+
+Returns the current playback state.
+
+```http
+GET /api/audio/status
+```
+
+### Successful Response
+
+```http
+200 OK
+```
+
+Example while an audio file is playing:
+
+```json
+{
+  "state": "Playing",
+  "isPlaying": true,
+  "currentItemId": "f3b41c59-3f0e-45b5-8127-33a8be3fd8a1",
+  "fileName": "alarm.mp3",
+  "startedAt": "2026-07-14T15:20:00.0000000+00:00"
+}
+```
+
+Example while idle:
+
+```json
+{
+  "state": "Idle",
+  "isPlaying": false,
+  "currentItemId": null,
+  "fileName": null,
+  "startedAt": null
+}
+```
+
+### Fields
+
+| Field           | Description                                                  |
+| --------------- | ------------------------------------------------------------ |
+| `state`         | Playback state. Current values are `Idle` and `Playing`.     |
+| `isPlaying`     | `true` when the current state is `Playing`.                  |
+| `currentItemId` | Identifier of the current playback queue item, or `null`.    |
+| `fileName`      | Name of the currently playing file, or `null`.               |
+| `startedAt`     | UTC timestamp when current playback started, or `null`.      |
+
 ## Notes
 
-The API accepts an audio file name, not an absolute file path.
+The audio playback API accepts a file name, not an absolute file path.
 
 The same audio file can be added to the playback queue multiple times.
 
-The current API does not provide authentication or authorization.
+The API does not currently provide authentication or authorization.
 
-The current API does not provide a playback status endpoint yet.
+Queues are stored in memory and are not persisted across application restarts.
