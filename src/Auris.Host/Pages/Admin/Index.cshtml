@@ -16,7 +16,19 @@
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>Сейчас воспроизводится</span>
-        <span id="playback-status-badge" class="badge text-bg-secondary">Idle</span>
+
+        <div class="d-flex align-items-center gap-2">
+            <button id="stop-playback-button"
+                    type="button"
+                    class="btn btn-sm btn-outline-danger d-none">
+                Остановить
+            </button>
+
+            <span id="playback-status-badge"
+                  class="badge text-bg-secondary">
+                Idle
+            </span>
+        </div>
     </div>
 
     <div class="card-body">
@@ -87,7 +99,8 @@
                 const badge = document.getElementById('playback-status-badge');
                 const currentFile = document.getElementById('playback-current-file');
                 const meta = document.getElementById('playback-current-meta');
-
+                const stopButton = document.getElementById('stop-playback-button');
+                
                 const isPlaying = status.isPlaying ?? status.IsPlaying;
                 const state = status.state ?? status.State ?? 'Idle';
                 const fileName = status.fileName ?? status.FileName;
@@ -97,6 +110,10 @@
                 if (isPlaying) {
                     badge.textContent = state;
                     badge.className = 'badge text-bg-success';
+                    
+                    stopButton.disabled = false;
+                    stopButton.textContent = 'Остановить';
+                    stopButton.classList.remove('d-none');
 
                     currentFile.textContent = fileName ?? 'Файл воспроизводится';
 
@@ -112,6 +129,7 @@
                     }
 
                     meta.textContent = metaItems.join(' · ');
+                    
                     return;
                 }
 
@@ -120,8 +138,40 @@
 
                 currentFile.textContent = 'Сейчас ничего не воспроизводится.';
                 meta.textContent = '';
+                
+                stopButton.disabled = false;
+                stopButton.textContent = 'Остановить';
+                stopButton.classList.add('d-none');
             } catch {
                 setPlaybackStatusError();
+            }
+        }
+
+        async function stopCurrentPlayback() {
+            const button =
+                document.getElementById('stop-playback-button');
+
+            if (!button) {
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Остановка...';
+
+            try {
+                const response = await fetch('/api/audio/current', {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok && response.status !== 404) {
+                    throw new Error(
+                        'Не удалось остановить воспроизведение.');
+                }
+
+                await updatePlaybackStatus();
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Остановить';
             }
         }
 
@@ -129,7 +179,8 @@
             const badge = document.getElementById('playback-status-badge');
             const currentFile = document.getElementById('playback-current-file');
             const meta = document.getElementById('playback-current-meta');
-
+            document.getElementById('stop-playback-button')?.classList.add('d-none');
+            
             badge.textContent = 'Unknown';
             badge.className = 'badge text-bg-warning';
 
@@ -450,6 +501,7 @@
                     enqueueTextToSpeech();
                 }
             });
+        document.getElementById('stop-playback-button')?.addEventListener('click', stopCurrentPlayback);
         
         updatePlaybackStatus();
         updateQueue();

@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Auris.Host.Endpoints;
 
-public static class PlaybackStatusEndpoints {
+public static class PlaybackEndpoints {
     
     public static IEndpointRouteBuilder MapPlaybackStatusEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var api = endpoints.MapGroup("/api/audio");
 
         api.MapGet("/status", GetStatus);
+        api.MapDelete("/current", StopCurrent);
 
         return endpoints;
     }
@@ -26,6 +27,10 @@ public static class PlaybackStatusEndpoints {
                 ? null
                 : Path.GetFileName(status.FilePath),
             StartedAt: status.StartedAt));
+    }
+    
+    private static IResult StopCurrent([FromServices] IPlaybackService playbackService) {
+        return playbackService.StopCurrent() ? Results.NoContent() : Results.NotFound();
     }
 
     private record PlaybackStatusResponse(
