@@ -123,7 +123,7 @@ Example configuration:
       "Capacity": 100
     },
     "AudioLibrary": {
-      "RootPath": "D:\\AudioLibrary",
+      "RootPath": "/AudioLibrary",
       "AllowedExtensions": [
         ".mp3",
         ".wav",
@@ -145,8 +145,8 @@ Example configuration:
     },
     "TextToSpeech": {
       "Cli": {
-        "ExecutablePath": "D:\\Tts\\tts-cli.exe",
-        "ModelPath": "D:\\Tts\\models\\ru_RU-model.onnx"
+        "ExecutablePath": "/tts_engine",
+        "ModelPath": "/model.onnx"
       }
     }
   }
