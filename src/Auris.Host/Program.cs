@@ -7,6 +7,7 @@ using Auris.Host.Endpoints;
 using Auris.Host.Service;
 using Auris.Infrastructure.AudioLibrary;
 using Auris.Infrastructure.ExternalPlayer;
+using Auris.Infrastructure.TextToSpeech;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,10 @@ builder.Services.AddOptions<AudioLibraryOptions>()
     .Validate(options => Directory.Exists(options.RootPath))
     .ValidateOnStart();
 
+builder.Services
+    .AddOptions<TextToSpeechCliOptions>()
+    .Bind(builder.Configuration.GetSection("Auris:TextToSpeech:Cli"));
+
 builder.Services.Configure<ExternalPlayerOptions>(
     builder.Configuration.GetSection("Auris:Player"));
 
@@ -26,9 +31,14 @@ builder.Services.AddSingleton<IPlaybackStateProvider, PlaybackStateProvider>();
 builder.Services.AddSingleton<ExternalProcessRunner>();
 builder.Services.AddSingleton<IAudioPlayer, ExternalProcessAudioPlayer>();
 builder.Services.AddSingleton<IAudioLibrary, FileSystemAudioLibrary>();
-builder.Services.AddSingleton<IPlaybackService, PlaybackService>();
 
+builder.Services.AddSingleton<IPlaybackService, PlaybackService>();
 builder.Services.AddHostedService<PlaybackBackgroundService>();
+
+builder.Services.AddSingleton<ITextToSpeechSynthesizer,CliTextToSpeechSynthesizer>();
+builder.Services.AddHostedService<TextToSpeechBackgroundService>();
+
+
 
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<AdminDashboardService>();
@@ -47,5 +57,6 @@ app.MapRazorPages().WithStaticAssets();
 app.MapAudioLibraryEndpoints();
 app.MapPlaybackQueueEndpoints();
 app.MapPlaybackStatusEndpoints();
+app.MapTextToSpeechEndpoints();
 
 app.Run();
