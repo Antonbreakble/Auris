@@ -2,6 +2,13 @@
 
 Auris is a source-available local audio playback and text-to-speech service for Windows and Linux.
 
+<p align="center">
+  <img
+    src="./docs/images/auris-banner.png"
+    alt="Auris — local audio playback and text-to-speech service"
+    width="100%">
+</p>
+
 The application provides a REST API and a web admin panel. Playback and text-to-speech requests are processed through bounded queues. External CLI applications are used for audio playback and speech synthesis.
 
 ## Features
