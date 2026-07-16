@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Auris.Core/Auris.Core.csproj" />
+    <Project Path="src/Auris.Desktop.Windows/Auris.Desktop.Windows.csproj" />
     <Project Path="src/Auris.Host/Auris.Host.csproj" />
     <Project Path="src/Auris.Infrastructure/Auris.Infrastructure.csproj" />
   </Folder>
