@@ -9,7 +9,12 @@ using Auris.Infrastructure.AudioLibrary;
 using Auris.Infrastructure.ExternalPlayer;
 using Auris.Infrastructure.TextToSpeech;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
+{
+    Args = args,
+    ContentRootPath = AppContext.BaseDirectory,
+    WebRootPath = "wwwroot",
+});
 
 builder.Services.Configure<QueueOptions>(
     builder.Configuration.GetSection("Auris:Queue"));
@@ -49,10 +54,9 @@ if (!app.Environment.IsDevelopment()) {
     app.UseExceptionHandler("/Error");
 }
 
+app.UseStaticFiles();
 app.UseRouting();
-
-app.MapStaticAssets();
-app.MapRazorPages().WithStaticAssets();
+app.MapRazorPages();
 
 app.MapAudioLibraryEndpoints();
 app.MapPlaybackQueueEndpoints();
