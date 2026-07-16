@@ -12,6 +12,7 @@ Available operations:
 
 - play an audio file;
 - view the playback queue;
+- view playback queue utilization;
 - clear the playback queue;
 - view available audio files;
 - view the current playback status;
@@ -35,6 +36,27 @@ Requests with a body use JSON:
 ```http
 Content-Type: application/json
 ```
+
+Unless otherwise specified, successful responses use JSON or have an empty body.
+
+The playback queue count endpoint returns plain text:
+
+```http
+Content-Type: text/plain
+```
+
+## SCADA Compatibility
+
+Some SCADA systems support only `GET` and `POST` requests.
+
+For this reason, operations that are normally exposed through `DELETE` also provide equivalent `POST` command endpoints:
+
+| Operation | REST endpoint | SCADA-compatible endpoint |
+| --- | --- | --- |
+| Clear playback queue | `DELETE /api/audio/queue/clear` | `POST /api/audio/queue/clear` |
+| Stop current playback | `DELETE /api/audio/current` | `POST /api/audio/current/stop` |
+
+Both variants execute the same operation and return the same status codes.
 
 ## Request Source
 
@@ -209,15 +231,50 @@ Example:
 }
 ```
 
+## View Playback Queue Count
+
+Returns the number of waiting items and the configured playback queue capacity in a compact text format.
+
+The currently playing item is not included in the count.
+
+```http
+GET /api/audio/queue/count
+```
+
+### Successful Response
+
+```http
+200 OK
+Content-Type: text/plain; charset=utf-8
+```
+
+Example:
+
+```text
+0/100
+```
+
+The value before `/` is the current number of waiting items. The value after `/` is the maximum queue capacity.
+
 ## Clear Playback Queue
 
 Clears all waiting items from the playback queue.
 
 The currently playing item is not stopped.
 
+REST endpoint:
+
 ```http
 DELETE /api/audio/queue/clear
 ```
+
+SCADA-compatible endpoint:
+
+```http
+POST /api/audio/queue/clear
+```
+
+Both endpoints execute the same operation.
 
 ### Successful Response
 
@@ -308,9 +365,19 @@ Stops the currently playing audio file.
 
 Waiting items remain in the playback queue. If the queue contains another item, its playback starts normally after the current playback is stopped.
 
+REST endpoint:
+
 ```http
 DELETE /api/audio/current
 ```
+
+SCADA-compatible endpoint:
+
+```http
+POST /api/audio/current/stop
+```
+
+Both endpoints execute the same operation.
 
 ### Successful Response
 
