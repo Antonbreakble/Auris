@@ -11,7 +11,9 @@ public static class PlaybackQueueEndpoints {
 
         api.MapPost("/play", Play);
         api.MapGet("/queue", GetQueue);
+        api.MapGet("/queue/count", GetQueueCount);
         api.MapDelete("/queue/clear", ClearQueue);
+        api.MapPost("/queue/clear", ClearQueue);
 
         return endpoints;
     }
@@ -67,6 +69,12 @@ public static class PlaybackQueueEndpoints {
             Items: items));
     }
 
+    private static IResult GetQueueCount([FromServices] IQueue<PlaybackQueueItem> playbackQueue) {
+        return Results.Text(
+            $"{playbackQueue.Count}/{playbackQueue.Capacity}",
+            "text/plain");
+    }
+    
     private static IResult ClearQueue([FromServices] IQueue<PlaybackQueueItem> playbackQueue) {
         playbackQueue.Clear();
         return Results.NoContent();

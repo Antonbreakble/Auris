@@ -12,6 +12,7 @@ public static class PlaybackEndpoints {
 
         api.MapGet("/status", GetStatus);
         api.MapDelete("/current", StopCurrent);
+        api.MapPost("/current/stop", StopCurrent);
 
         return endpoints;
     }
