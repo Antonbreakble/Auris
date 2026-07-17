@@ -13,12 +13,12 @@ The application provides a REST API and a web admin panel. Playback and text-to-
 
 ## Features
 
-- Local file-based audio library.
-- Queued audio playback.
-- Text-to-speech generation with WAV caching.
-- Configurable external audio player and TTS generator.
-- REST API for integration with external systems.
-- Web admin panel for playback, queue, library, and text-to-speech operations.
+- Add audio notifications and speech synthesis to any SCADA system through HTTP
+- Centralize playback and prevent messages from overlapping
+- Run entirely on-premises without cloud services
+- Share a single audio server between multiple systems
+- Cache generated speech for faster repeated playback
+- Manage playback and queues through a web interface
 
 ## Documentation
 
