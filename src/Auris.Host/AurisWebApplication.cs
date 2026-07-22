@@ -29,19 +29,19 @@ public static class AurisWebApplication
             });
 
         builder.Services.Configure<QueueOptions>(
-            builder.Configuration.GetSection("Auris:Queue"));
+            builder.Configuration.GetSection("Application:Queue"));
 
         builder.Services.AddOptions<AudioLibraryOptions>()
-            .Bind(builder.Configuration.GetSection("Auris:AudioLibrary"))
+            .Bind(builder.Configuration.GetSection("Application:AudioLibrary"))
             .Validate(options => Directory.Exists(options.RootPath))
             .ValidateOnStart();
 
         builder.Services
             .AddOptions<TextToSpeechCliOptions>()
-            .Bind(builder.Configuration.GetSection("Auris:TextToSpeech:Cli"));
+            .Bind(builder.Configuration.GetSection("Application:TextToSpeech:Cli"));
 
         builder.Services.Configure<ExternalPlayerOptions>(
-            builder.Configuration.GetSection("Auris:Player"));
+            builder.Configuration.GetSection("Application:Player"));
 
         builder.Services.AddSingleton(typeof(IQueue<>), typeof(BoundedQueue<>));
         builder.Services.AddSingleton<IPlaybackStateProvider, PlaybackStateProvider>();

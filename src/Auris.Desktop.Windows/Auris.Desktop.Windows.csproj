@@ -6,15 +6,9 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>Resources\auris.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
   </PropertyGroup>
-
   
-  <ItemGroup>
-    <Reference Include="Microsoft.AspNetCore">
-      <HintPath>..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\10.0.5\Microsoft.AspNetCore.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Auris.Host\Auris.Host.csproj" />

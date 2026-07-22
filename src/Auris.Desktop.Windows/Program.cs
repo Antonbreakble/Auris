@@ -1,3 +1,5 @@
+using Auris.Branding;
+
 namespace Auris.Desktop.Windows;
 
 static class Program
@@ -16,8 +18,8 @@ static class Program
         if (!isFirstInstance)
         {
             MessageBox.Show(
-                "Auris уже запущен.",
-                "Auris",
+                $"{ProductBrand.Name} уже запущен.",
+                ProductBrand.Name,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 

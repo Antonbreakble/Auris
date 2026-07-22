@@ -1,0 +1,33 @@
+<Project>
+
+  <PropertyGroup>
+    <BrandName>Auris</BrandName>
+    
+    <BrandDescription>Local audio service</BrandDescription>
+    <BrandCompany>Antonbreakble</BrandCompany>
+
+    <BrandDesktopExecutableName>Auris</BrandDesktopExecutableName>
+    <BrandHostExecutableName>Auris.Host</BrandHostExecutableName>
+
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>$(BrandName)</Product>
+    <AssemblyTitle>$(BrandName)</AssemblyTitle>
+    <Description>$(BrandDescription)</Description>
+    <Company>$(BrandCompany)</Company>
+  </PropertyGroup>
+
+  <!-- Windows Desktop -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Auris.Desktop.Windows'">
+    <AssemblyName>$(BrandDesktopExecutableName)</AssemblyName>
+    <RootNamespace>Auris.Desktop.Windows</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Linux/Web Host -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Auris.Host'">
+    <AssemblyName>$(BrandHostExecutableName)</AssemblyName>
+    <RootNamespace>Auris.Host</RootNamespace>
+  </PropertyGroup>
+
+</Project>

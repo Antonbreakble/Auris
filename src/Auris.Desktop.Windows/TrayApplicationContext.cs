@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Auris.Branding;
 using Auris.Host;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -15,12 +16,12 @@ internal class TrayApplicationContext : ApplicationContext {
     private readonly Icon _applicationIcon;
 
     public TrayApplicationContext(string[] args) {
-        _openItem = new ToolStripMenuItem("Open") {
+        _openItem = new ToolStripMenuItem("Открыть") {
             Enabled = false
         };
         _openItem.Click += (_, _) => OpenAdminPanel();
         
-        var exitItem = new ToolStripMenuItem("Close");
+        var exitItem = new ToolStripMenuItem("Закрыть");
         exitItem.Click += async (_, _) => await ExitAsync();
 
         var menu = new ContextMenuStrip();
@@ -32,7 +33,7 @@ internal class TrayApplicationContext : ApplicationContext {
         
         _notifyIcon = new NotifyIcon {
             Icon = _applicationIcon,
-            Text = "Auris — start",
+            Text = $"{ProductBrand.Name} — Открыть",
             ContextMenuStrip = menu,
             Visible = true
         };
@@ -55,15 +56,15 @@ internal class TrayApplicationContext : ApplicationContext {
 
             await _webApplication.StartAsync();
 
-            _notifyIcon.Text = "Auris";
+            _notifyIcon.Text = ProductBrand.Name;
             _openItem.Enabled = true;
         }
         catch (Exception exception) {
             _notifyIcon.Visible = false;
 
             MessageBox.Show(
-                $"Auris Error.\n\n{exception.Message}",
-                "Error during start Auris",
+                $"{ProductBrand.Name} ошибка.\n\n{exception.Message}",
+                $"Ошибка во время запуска {ProductBrand.Name}",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
 
